@@ -1,9 +1,7 @@
 QBCore = exports['qb-core']:GetCoreObject()
 
-local LastZone = nil
-local CurrentAction = nil
-local CurrentActionMsg = ''
-local hasAlreadyEnteredMarker = false
+local zoneName = nil
+local inZone = false
 local allMyOutfits = {}
 local isPurchaseSuccessful = false
 local PlayerData = {}
@@ -372,19 +370,19 @@ end)
 RegisterNetEvent('fivem-appearance:clothingShop', function()
 	exports['qb-menu']:openMenu({
         {
-            header = "👚 | Clothing Store Options",
+            header = "👚 | Klädaffärsalternativ",
             isMenuHeader = true, -- Set to true to make a nonclickable title
         },
         {
-            header = "Buy Clothing - $"..Config.Money,
-			txt = "Pick from a wide range of items to wear",
+            header = "Köp Kläder - "..Config.Money.."kr",
+			txt = "Ett brett utbud av plagg att bära",
             params = {
                 event = "fivem-appearance:clothingMenu",
             }
         },
 		{
-            header = "Change Outfit",
-			txt = "Pick from any of your currently saved outfits",
+            header = "Ändra outfit",
+			txt = "Välj från någon av dina sparade outfits",
             params = {
                 event = "fivem-appearance:pickNewOutfit",
                 args = {
@@ -394,15 +392,15 @@ RegisterNetEvent('fivem-appearance:clothingShop', function()
             }
         },
 		{
-            header = "Save New Outfit",
-			txt = "Save a new outfit you can use later on",
+            header = "Spara ny outfit",
+			txt = "Spara en ny outfit du kan använda senare",
             params = {
                 event = "fivem-appearance:saveOutfit",
             }
         },
 		{
-            header = "Delete Outfit",
-			txt = "Yeah... We didnt like that one either",
+            header = "Radera outfit",
+			txt = "Vi tyckte inte heller 🤣",
             params = {
                 event = "fivem-appearance:deleteOutfitMenu",
                 args = {
@@ -421,7 +419,7 @@ RegisterNetEvent('fivem-appearance:pickNewOutfit', function(data)
 	Wait(150)
 	local outfitMenu = {
         {
-            header = '< Go Back',
+            header = '< Gå tillbaka',
             params = {
                 event = 'fivem-appearance:clothingShop'
             }
@@ -481,11 +479,11 @@ end)
 
 RegisterNetEvent('fivem-appearance:saveOutfit', function()
 	local keyboard = exports['qb-input']:ShowInput({
-        header = "Name your outfit",
-        submitText = "Create Outfit",
+        header = "Namnge din outfit",
+        submitText = "Skapa outfit",
         inputs = {
             {
-                text = "Outfit Name",
+                text = "Outfit Namn",
                 name = "input",
                 type = "text",
                 isRequired = true
@@ -500,7 +498,7 @@ RegisterNetEvent('fivem-appearance:saveOutfit', function()
 		local pedProps = exports['fivem-appearance']:getPedProps(playerPed)
 		Wait(500)
 		TriggerServerEvent('fivem-appearance:saveOutfit', keyboard.input, pedModel, pedComponents, pedProps)
-		QBCore.Functions.Notify('Outfit '..keyboard.input.. ' has been saved', 'success')
+		QBCore.Functions.Notify('Outfit '..keyboard.input.. ' har sparats', 'success')
 	end
 end)
 
@@ -511,7 +509,7 @@ RegisterNetEvent('fivem-appearance:deleteOutfitMenu', function(data)
 	Wait(150)
 	local DeleteMenu = {
         {
-            header = '< Go Back',
+            header = '< Gå tillbaka',
             params = {
                 event = 'fivem-appearance:clothingShop'
             }
@@ -519,8 +517,8 @@ RegisterNetEvent('fivem-appearance:deleteOutfitMenu', function(data)
     }
     for i=1, #allMyOutfits, 1 do
         DeleteMenu[#DeleteMenu + 1] = {
-            header = 'Delete "'..allMyOutfits[i].name..'"',
-			txt = 'You will never be able to get this back!',
+            header = 'Radera "'..allMyOutfits[i].name..'"',
+			txt = 'Du kommer aldrig att kunna få tillbaka den!',
             params = {
 				event = 'fivem-appearance:deleteOutfit',
 				args = allMyOutfits[i].id
@@ -533,7 +531,7 @@ end)
 RegisterNetEvent('fivem-appearance:deleteOutfit', function(id)
 	TriggerServerEvent('fivem-appearance:deleteOutfit', id)
 	-- TriggerEvent('fivem-appearance:clothingShop')
-	QBCore.Functions.Notify('Outfit Deleted', 'error')
+	QBCore.Functions.Notify('Outfit raderas', 'error')
 end)
 
 RegisterNetEvent("fivem-appearance:purchase", function(bool)
@@ -556,6 +554,7 @@ RegisterNetEvent('fivem-appearance:clothingMenu', function()
 		exports['fivem-appearance']:startPlayerCustomization(function(appearance)
 			if appearance then
 				TriggerServerEvent('fivem-appearance:save', appearance)
+                TriggerEvent('fivem-appearance:saveOutfit')
 				print('Player Clothing Saved')
 				Wait(1000) -- Wait is needed to clothing menu dosent overwrite the tattoos
 				TriggerServerEvent('Select:Tattoos')
@@ -622,12 +621,12 @@ end)
 RegisterNetEvent('qb-clothing:client:openOutfitMenu', function()  -- Name is so that you dont have to replace the event, Used in Appartments, Bossmenu, etc...
 	exports['qb-menu']:openMenu({
         {
-            header = "👔 | Outfit Options",
+            header = "👔 | Outfit-alternativ",
             isMenuHeader = true, -- Set to true to make a nonclickable title
         },
 		{
-            header = "Change Outfit",
-			txt = "Pick from any of your currently saved outfits",
+            header = "Ändra outfit",
+			txt = "Välj från någon av dina sparade outfits",
             params = {
                 event = "fivem-appearance:pickNewOutfitApp",
                 args = {
@@ -637,15 +636,15 @@ RegisterNetEvent('qb-clothing:client:openOutfitMenu', function()  -- Name is so 
             }
         },
 		{
-            header = "Save New Outfit",
-			txt = "Save a new outfit you can use later on",
+            header = "Spara ny outfit",
+			txt = "Spara en ny outfit du kan använda senare",
             params = {
                 event = "fivem-appearance:saveOutfit",
             }
         },
 		{
-            header = "Delete Outfit",
-			txt = "Yeah... We didnt like that one either",
+            header = "Radera outfit",
+			txt = "Vi tyckte inte heller 🤣",
             params = {
                 event = "fivem-appearance:deleteOutfitMenu",
                 args = {
@@ -660,19 +659,19 @@ end)
 RegisterNetEvent('qb-clothing:client:openWorkOutfits', function(datawork)  -- Name is so that you dont have to replace the event, Used in Appartments, Bossmenu, etc...
 	exports['qb-menu']:openMenu({
         {
-            header = "👔 | Outfit Options",
+            header = "👔 | Outfit-alternativ",
             isMenuHeader = true,
         },
 		{
-            header = "Civilian Outfit",
-			txt = "Put on your clothes",
+            header = "Civilkläder",
+			txt = "Ta på dina vanliga kläder",
             params = {
                 event = "fivem-appearance:reloadskin",
             }
         },
 		{
-            header = "Work Clothes",
-			txt = "Pick from any of your work outfits",
+            header = "Arbetskläder",
+			txt = "Välj arbetskläder",
             params = {
                 event = "qb-clothes:pickWorkOutfitApp",
                 args = datawork,
@@ -682,26 +681,28 @@ RegisterNetEvent('qb-clothing:client:openWorkOutfits', function(datawork)  -- Na
 end)
 
 RegisterNetEvent('qb-clothes:pickWorkOutfitApp', function(datawork)
-	Wait(150)
-	local outfitDefMenu = {
+    Wait(150)
+    local outfitDefMenu = {
         {
-            header = '< Go Back',
+            header = '< Gå tillbaka',
             params = {
                 event = 'qb-clothing:client:openWorkOutfits',
-				args = datawork
+                args = datawork
             }
         }
     }
-    for k, v in pairs(datawork) do
-        outfitDefMenu[#outfitDefMenu + 1] = {
-            header = v.outfitLabel,
-            params = {
-                event = 'qb-clothing:client:loadWorkOutfit',
-                args = { oData = v, vData = datawork }
+    if datawork ~= nil then
+        for k, v in pairs(datawork) do
+            outfitDefMenu[#outfitDefMenu + 1] = {
+                header = v.outfitLabel,
+                params = {
+                    event = 'qb-clothing:client:loadWorkOutfit',
+                    args = { oData = v, vData = datawork }
+                }
             }
-        }
+        end
+        exports['qb-menu']:openMenu(outfitDefMenu)
     end
-    exports['qb-menu']:openMenu(outfitDefMenu)
 end)
 
 RegisterNetEvent('qb-clothes:pickWorkOutfit', function(datawork)
@@ -739,7 +740,7 @@ RegisterNetEvent('fivem-appearance:pickNewOutfitApp', function(data)
 	Wait(150)
 	local outfitMenu = {
         {
-            header = '< Go Back',
+            header = '< Gå tillbaka',
             params = {
                 event = 'qb-clothing:client:openOutfitMenu'
             }
@@ -769,7 +770,7 @@ RegisterNetEvent('fivem-appearance:deleteOutfitMenuApp', function(data)
 	Wait(150)
 	local DeleteMenu = {
         {
-            header = '< Go Back',
+            header = '< Gå tillbaka',
             params = {
                 event = 'fivem-appearance:clothingShop'
             }
@@ -777,8 +778,8 @@ RegisterNetEvent('fivem-appearance:deleteOutfitMenuApp', function(data)
     }
     for i=1, #allMyOutfits, 1 do
         DeleteMenu[#DeleteMenu + 1] = {
-            header = 'Delete "'..allMyOutfits[i].name..'"',
-			txt = 'You will never be able to get this back!',
+            header = 'Radera "'..allMyOutfits[i].name..'"',
+			txt = 'Du kommer aldrig att kunna få tillbaka den!',
             params = {
 				event = 'fivem-appearance:deleteOutfit',
 				args = allMyOutfits[i].id
@@ -999,9 +1000,9 @@ RegisterNetEvent('qb-clothing:client:loadWorkOutfit', function(oData)
 	TriggerEvent("qb-clothes:pickWorkOutfitApp", oData.vData)
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate')
-AddEventHandler('QBCore:Client:OnJobUpdate', function(JobInfo)
+RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
     PlayerData.job = JobInfo
+    PlayerJob = JobInfo
 end)
 
 local function DrawText3Ds(x, y, z, text)
@@ -1019,152 +1020,112 @@ local function DrawText3Ds(x, y, z, text)
     ClearDrawOrigin()
 end
 
--- ClothingRooms from qb-clothing
-
-CreateThread(function()
-    while true do
-        if LocalPlayer.state.isLoggedIn then
-            local ped = PlayerPedId()
-            local pos = GetEntityCoords(ped)
-            local inRange = false
-            for k, v in pairs(Config.ClothingRooms) do
-                local dist = #(pos - Config.ClothingRooms[k].coords)
-                if dist < 15 then
-                    if not creatingCharacter then
-                        DrawMarker(2, Config.ClothingRooms[k].coords, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.4, 0.4, 0.2, 255, 255, 255, 255, 0, 0, 0, 1, 0, 0, 0)
-                        if dist < 2 then
-                            if PlayerJob.name == Config.ClothingRooms[k].requiredJob then
-                                DrawText3Ds(Config.ClothingRooms[k].coords.x, Config.ClothingRooms[k].coords.y, Config.ClothingRooms[k].coords.z + 0.3, '[~g~E~w~] - Job Clothing')
-                                if IsControlJustPressed(0, 38) then -- E
-                                    gender = "male"
-                                    if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "female" end
-									TriggerEvent("qb-clothing:client:openWorkOutfits", Config.Outfits[PlayerJob.name][gender])
-                                end
-                            else
-                                if PlayerGang.name == Config.ClothingRooms[k].requiredJob then
-                                    DrawText3Ds(Config.ClothingRooms[k].coords.x, Config.ClothingRooms[k].coords.y, Config.ClothingRooms[k].coords.z + 0.3, '[~g~E~w~] - Gang Clothing')
-                                    if IsControlJustPressed(0, 38) then -- E
-                                        gender = "male"
-                                        if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "female" end
-										TriggerEvent("qb-clothing:client:openWorkOutfits", Config.Outfits[PlayerGang.name][gender])
-                                    end
-                                end
-                            end
-                        end
-                        inRange = true
-                    end
-                end
-            end
-            if not inRange then
-                Wait(2000)
-            end
+Citizen.CreateThread(function()
+    for k, v in pairs (Config.Stores) do
+        if Config.Stores[k].shopType == "clothing" then
+            local clothingShop = AddBlipForCoord(Config.Stores[k].coords)
+            SetBlipSprite(clothingShop, 73)
+            SetBlipColour(clothingShop, 47)
+            SetBlipScale  (clothingShop, 0.7)
+            SetBlipAsShortRange(clothingShop, true)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString("Clothing store")
+            EndTextCommandSetBlipName(clothingShop)
         end
-        Wait(5)
+
+        if Config.Stores[k].shopType == "barber" then
+            local barberShop = AddBlipForCoord(Config.Stores[k].coords)
+            SetBlipSprite(barberShop, 71)
+            SetBlipColour(barberShop, 0)
+            SetBlipScale  (barberShop, 0.7)
+            SetBlipAsShortRange(barberShop, true)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString("Barber")
+            EndTextCommandSetBlipName(barberShop)
+        end
     end
 end)
 
--- Theads
-
 CreateThread(function()
-	while true do
 
-		Wait(0)
+    local zones = {}
+    for k, v in pairs(Config.Stores) do
+        zones[#zones+1] = BoxZone:Create(
+            v.coords, v.length, v.width, {
+            name = v.shopType,
+            debugPoly = false,
+        })
+    end
 
-		if CurrentAction ~= nil then
+    local clothingCombo = ComboZone:Create(zones, {name = "clothingCombo", debugPoly = false})
+    clothingCombo:onPlayerInOut(function(isPointInside, point, zone)
+        if isPointInside then
+            inZone = true
+            zoneName = zone.name
+            if zoneName == 'clothing' then
+                exports['qb-core']:DrawText('[E] - Klädäffär', 'left')
+            elseif zoneName == 'barber' then
+                exports['qb-core']:DrawText('[E] - Frisör', 'left')
+            end
+        else
+            inZone = false
+            exports['qb-core']:HideText()
+        end
+    end)
 
-			if IsControlPressed(1, 38) then
-				Wait(500)
+    local roomZones = {}
+    for k, v in pairs(Config.ClothingRooms) do
+        roomZones[#roomZones+1] = BoxZone:Create(
+            v.coords, v.length, v.width, {
+            name = 'ClothingRooms_' .. k,
+            debugPoly = false,
+        })
+    end
 
-				if CurrentAction == 'clothingMenu' then
-					TriggerEvent("fivem-appearance:clothingShop")
-				end
-				
-				if CurrentAction == 'barberMenu' then
-					TriggerEvent("fivem-appearance:barberMenu")
-				end
-
-			end
-		end
-	end
+    local clothingRoomsCombo = ComboZone:Create(roomZones, {name = "clothingRoomsCombo", debugPoly = false})
+    clothingRoomsCombo:onPlayerInOut(function(isPointInside, point, zone)
+        if isPointInside then
+            zoneName = zone.name
+            if (PlayerData.job.name == Config.ClothingRooms[tonumber(string.sub(zone.name, 15))].requiredJob) then
+                inZone = true
+                exports['qb-core']:DrawText('[E] - Omklädningsrum', 'left')
+            end
+        else
+            inZone = false
+            exports['qb-core']:HideText()
+        end
+    end)
 end)
 
-CreateThread(function()
-	for k,v in ipairs(Config.BarberShops) do
-		local blip = AddBlipForCoord(v)
-
-		SetBlipSprite (blip, 71)
-		-- SetBlipColour (blip, 47)
-		SetBlipScale (blip, 0.7)
-		SetBlipAsShortRange(blip, true)
-
-		BeginTextCommandSetBlipName('STRING')
-		AddTextComponentSubstringPlayerName('Barber Shop')
-		EndTextCommandSetBlipName(blip)
-	end
-	for k,v in ipairs(Config.ClothingShops) do
-		local data = v
-		if data.blip == true then
-			local blip = AddBlipForCoord(data.coords)
-
-			SetBlipSprite (blip, 73)
-			-- SetBlipColour (blip, 47)
-			SetBlipScale (blip, 0.7)
-			SetBlipAsShortRange(blip, true)
-
-			BeginTextCommandSetBlipName('STRING')
-			AddTextComponentSubstringPlayerName('Clothing Store')
-			EndTextCommandSetBlipName(blip)
-		end
-	end
-end)
-
-CreateThread(function()
-	while true do
-		local playerCoords, isInClothingShop, isInPDPresets, isInBarberShop, currentZone, letSleep = GetEntityCoords(PlayerPedId()), false, false, nil, true
-		local sleep = 2000
-		for k,v in pairs(Config.ClothingShops) do
-			local data = v
-			local distance = #(playerCoords - data.coords)
-
-			if distance < Config.DrawDistance then
-				sleep = 0
-				if distance < data.MarkerSize.x then
-					isInClothingShop, currentZone = true, k
-				end
-			end
-		end
-
-		for k,v in pairs(Config.BarberShops) do
-			local distance = #(playerCoords - v)
-
-			if distance < Config.DrawDistance then
-				sleep = 0
-				if distance < Config.MarkerSize.x then
-					isInBarberShop, currentZone = true, k
-				end
-			end
-		end
-		
-		if (isInClothingShop and not hasAlreadyEnteredMarker) or (isInClothingShop and LastZone ~= currentZone) then
-			hasAlreadyEnteredMarker, LastZone = true, currentZone
-			CurrentAction     = 'clothingMenu'
-			exports['qb-drawtext']:DrawText('[E] Clothing Menu','left')
-		end
-
-		if (isInBarberShop and not hasAlreadyEnteredMarker) or (isInBarberShop and LastZone ~= currentZone) then
-			hasAlreadyEnteredMarker, LastZone = true, currentZone
-			CurrentAction     = 'barberMenu'
-			exports['qb-drawtext']:DrawText('[E] Barber Menu','left')
-		end
-
-		if not isInClothingShop and not isInBarberShop and hasAlreadyEnteredMarker then
-			hasAlreadyEnteredMarker = false
-			sleep = 1000
-			TriggerEvent('fivem-appearance:hasExitedMarker', LastZone)
-			exports['qb-drawtext']:HideText()
-		end
-		Wait(sleep)
-	end
+-- Clothing Thread
+CreateThread(function ()
+    Wait(1000)
+    while true do
+        local sleep = 1000
+        if inZone then
+            sleep = 5
+            if string.find(zoneName, 'ClothingRooms_') then
+                if IsControlJustReleased(0, 38) then
+                    local clothingRoom = Config.ClothingRooms[tonumber(string.sub(zoneName, 15))]
+                    customCamLocation = clothingRoom.cameraLocation
+                    local gradeLevel = 0
+                    if clothingRoom.isGang then gradeLevel = PlayerData.gang.grade.level else gradeLevel = PlayerData.job.grade.level end
+                    TriggerEvent('qb-clothing:client:openWorkOutfits', clothingRoom.requiredJob, gradeLevel)
+                end
+            elseif zoneName == 'clothing' then
+                if IsControlJustReleased(0, 38) then
+                    TriggerEvent("fivem-appearance:clothingShop")
+                end
+            elseif zoneName == 'barber' then
+                if IsControlJustReleased(0, 38) then
+                    TriggerEvent("fivem-appearance:barberMenu")
+                end
+            end
+        else
+            sleep = 1000
+        end
+        Wait(sleep)
+    end
 end)
 
 -- Command(s)
@@ -1193,6 +1154,8 @@ RegisterNetEvent('fivem-appearance:reloadskin', function(data)
 		SetEntityHealth(PlayerPedId(), health)
     end
 end)
+
+
 
 -- Testing Command
 
