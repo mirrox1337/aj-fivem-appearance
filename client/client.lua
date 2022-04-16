@@ -1106,11 +1106,9 @@ CreateThread(function ()
             sleep = 5
             if string.find(zoneName, 'ClothingRooms_') then
                 if IsControlJustReleased(0, 38) then
-                    local clothingRoom = Config.ClothingRooms[tonumber(string.sub(zoneName, 15))]
-                    customCamLocation = clothingRoom.cameraLocation
-                    local gradeLevel = 0
-                    if clothingRoom.isGang then gradeLevel = PlayerData.gang.grade.level else gradeLevel = PlayerData.job.grade.level end
-                    TriggerEvent('qb-clothing:client:openWorkOutfits', clothingRoom.requiredJob, gradeLevel)
+                    gender = "male"
+                    if QBCore.Functions.GetPlayerData().charinfo.gender == 1 then gender = "female" end
+                    TriggerEvent("qb-clothing:client:openWorkOutfits", Config.Outfits[PlayerJob.name][gender])
                 end
             elseif zoneName == 'clothing' then
                 if IsControlJustReleased(0, 38) then
